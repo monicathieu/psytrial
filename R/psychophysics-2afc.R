@@ -1,5 +1,7 @@
 #' Generate fake data for one subject, 2AFC psychophysics-style task
 #' 
+#' Fits a probit/cumulative normal model to fake single-subject data.
+#' 
 #' @importFrom magrittr %>%
 #'
 #' @param trash A throwaway first argument to allow piping from apply functions like replicate.
