@@ -2,7 +2,11 @@
 #' 
 #' Fits a probit/cumulative normal model to fake single-subject data.
 #' 
+#' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
+#' @importFrom plyr mapvalues
+#' @importFrom stats pnorm rbinom glm binomial
+#' @importFrom tidyr gather
 #'
 #' @param trash A throwaway first argument to allow piping from apply functions like replicate.
 #' @param bins A vector of numeric values, indicating the levels
@@ -37,13 +41,13 @@ one.sim.psyphys2afc <- function (trash = NULL,
   sim.data = as.data.frame(t(replicate(1, rbinom(n = length(xlevels),
                                                  size = trials.per.bin,
                                                  prob = bin.probs)))) %>%
-    mutate(fake.subj.num = 1:n()) %>%
-    gather(key = "xlevel", value = "n.yes.resps", -fake.subj.num) %>%
-    mutate(xlevel = as.numeric(plyr::mapvalues(xlevel, from = unique(xlevel), to = xlevels)),
+    dplyr::mutate(fake.subj.num = 1:n()) %>%
+    tidyr::gather(key = "xlevel", value = "n.yes.resps", -fake.subj.num) %>%
+    dplyr::mutate(xlevel = as.numeric(plyr::mapvalues(xlevel, from = unique(xlevel), to = xlevels)),
            n.no.resps = trials.per.bin - n.yes.resps,
            prop.resps = n.yes.resps / trials.per.bin)
   
-  sim.model = summary(glm(cbind(n.yes.resps, n.no.resps) ~ xlevel,
+  sim.model = summary(stats::glm(cbind(n.yes.resps, n.no.resps) ~ xlevel,
                           family = binomial(link = "probit"),
                           data = sim.data))
   
