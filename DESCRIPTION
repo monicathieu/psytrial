@@ -11,9 +11,10 @@ Description: This package is designed to assist psychological/behavioral researc
   of functions that generate data from one simulated experimental participant for any of a
   set of common cognitive task paradigms, and report power in measuring single-participant
   parameters as a function of trial count.
-Depends: R (>= 3.4.3)
+Depends: R (>= 3.4.1)
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports:
+Imports: dplyr, magrittr, plyr, stats, tidyr
 Suggests:
+RoxygenNote: 6.0.1
