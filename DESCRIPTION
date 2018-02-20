@@ -1,0 +1,19 @@
+Package: psytrial
+Title: Estimate Necessary Trial Counts for a Behavioral Task
+Version: 1.0.0
+Authors@R: person("Monica", "Thieu", email = "monica.thieu@columbia.edu", role = c("aut", "cre"))
+Description: This package is designed to assist psychological/behavioral researchers
+  in determining how long their experimental tasks need to be. Researchers often use
+  the rule of thumb that "more trials is better", to reduce error in estimating parameters
+  for an experimental participant, but participant fatigue and other constraints make it
+  imperative for researchers to find the minimum number of trials for a given behavioral
+  task that will reliably estimate parameters of interest. This package contains a series
+  of functions that generate data from one simulated experimental participant for any of a
+  set of common cognitive task paradigms, and report power in measuring single-participant
+  parameters as a function of trial count.
+Depends: R (>= 3.4.3)
+License: file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+Suggests:
