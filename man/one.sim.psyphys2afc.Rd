@@ -5,22 +5,33 @@
 \title{Generate fake data for one subject, 2AFC psychophysics-style task}
 \usage{
 one.sim.psyphys2afc(trash = NULL, xmin = NULL, xmax = NULL,
-  xstep = NULL, n.xlevels = NULL, mean, sd, trials.per.bin)
+  n.xlevels = NULL, xstep = NULL, mean, sd, trials.per.bin)
 }
 \arguments{
 \item{trash}{A throwaway first argument to allow piping from apply functions like replicate.}
 
-\item{mean}{A numeric value specifying the "true mean" from which
-simulated data will be generated.}
+\item{xmin}{A numeric value specifying the minimum stimulus intensity
+to be presented.}
+
+\item{xmax}{A numeric value specifying the maximum stimulus intensity
+to be presented.}
+
+\item{n.xlevels}{A numeric value specifying the number of intensity levels
+at which stimuli will be presented. Assumes that \code{xmin} and \code{xmax}
+will be the first and last intensity levels respectively.}
+
+\item{xstep}{Optional numeric value specifying the step size from one intensity
+level to the next. If specifying this, do not specify \code{n.xlevels}. If both
+are specified, the function defaults to calculating intensity levels from \code{n.xlevels}.}
+
+\item{mean}{A numeric value specifying the "true mean" of the probit
+model from which simulated data will be generated.}
 
 \item{sd}{A numeric value specifying the "true standard deviation"
-from which simulated data will be generated.}
+of the probit model from which simulated data will be generated.}
 
 \item{trials.per.bin}{A numeric value specifying the number of trials
 presented PER stimulus intensity bin.}
-
-\item{bins}{A vector of numeric values, indicating the levels
-of intensity at which stimuli will be presented.}
 }
 \value{
 The estimated mean and standard deviation of the probit model
