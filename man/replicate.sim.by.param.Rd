@@ -4,15 +4,19 @@
 \alias{replicate.sim.by.param}
 \title{Repeat data simulation for multiple levels of a parameter}
 \usage{
-replicate.sim.by.param(type = "psychophysics.2afc", ...)
+replicate.sim.by.param(type, ...)
 }
 \arguments{
 \item{type}{A string indicating the label for the type of
-task to be replicated. Currently supports \code{"psychophysics.2afc"}.}
+task to be replicated. Currently supports \code{"psychophysics.2afc"},
+\code{"sdt.dprime"}, \code{"mean.normal"}, and \code{"diff.normal"}.}
 
 \item{...}{arguments ultimately passed to the workhorse single simulation
 function specified by \code{type}.
-For \code{"psychophysics.2afc"}, please see the help for \code{one.sim.psyphys2afc}.}
+For \code{"psychophysics.2afc"}, please see the help for \code{one.sim.psyphys2afc}.
+For \code{"sdt.dprime"}, please see the help for \code{one.sim.sdt.dprime}.
+For \code{"mean.normal"}, please see the help for \code{one.sim.mean.normal}.
+For \code{"diff.normal"}, please see the help for \code{one.sim.diff.normal}.}
 }
 \value{
 a long dataframe containing the performance parameter estimates

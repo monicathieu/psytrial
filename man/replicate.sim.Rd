@@ -6,17 +6,21 @@
 workhorse function to repeatedly call a \code{one.sim} function
 and store the results of every call}
 \usage{
-replicate.sim(n.reps, type = "psychophysics.2afc", ...)
+replicate.sim(n.reps, type, ...)
 }
 \arguments{
 \item{n.reps}{number of simulations to run}
 
 \item{type}{A string indicating the label for the type of
-task to be replicated. Currently supports \code{"psychophysics.2afc"}.}
+task to be replicated. Currently supports \code{"psychophysics.2afc"},
+\code{"sdt.dprime"}, \code{"mean.normal"}, and \code{"diff.normal"}.}
 
 \item{...}{arguments ultimately passed to the workhorse single simulation
 function specified by \code{type}.
-For \code{"psychophysics.2afc"}, please see the help for \code{one.sim.psyphys2afc}.}
+For \code{"psychophysics.2afc"}, please see the help for \code{one.sim.psyphys2afc}.
+For \code{"sdt.dprime"}, please see the help for \code{one.sim.sdt.dprime}.
+For \code{"mean.normal"}, please see the help for \code{one.sim.mean.normal}.
+For \code{"diff.normal"}, please see the help for \code{one.sim.diff.normal}.}
 }
 \value{
 a dataframe where each row is a simulation and each column
