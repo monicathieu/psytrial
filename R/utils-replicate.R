@@ -1,8 +1,9 @@
 #' Repeat data simulation for multiple levels of a parameter
-#' 
+#'
 #' @export
 #' @importFrom dplyr bind_rows
-#' 
+#' @importFrom tidyr separate
+#'
 #' @param type A string indicating the label for the type of
 #' task to be replicated. Currently supports \code{"psychophysics.2afc"}.
 #' @param ... arguments ultimately passed to the workhorse single simulation
@@ -14,18 +15,23 @@
 replicate.sim.by.param <- function(type = "psychophysics.2afc",
                                    ...) {
   these.dots = list(...)
-  param.to.rep = names(these.dots)[(lapply(these.dots, length)) > 1]
-  
+  param.names.to.rep = names(these.dots)[lapply(these.dots, length) > 1]
+  # nb that expand.grid() outputs a dataframe
+  these.dots.expanded = as.list(do.call("expand.grid", these.dots))
+  # cleaning, idk if this affects anything but why not
+  attr(these.dots.expanded, "out.attrs") <- NULL
+
   if (type == "psychophysics.2afc") {
-    out.array = mapply(replicate.sim, ...)
-    
+    these.dots.expanded$FUN = quote(replicate.sim)
+    out.array = do.call("mapply", these.dots.expanded)
+
     out = lapply(1:dim(out.array)[2],
                  flatten.array.byrow, a = out.array, colnames = c("mean", "sd"))
-    names(out) = these.dots$param.to.rep
-    
+    names(out) = do.call("paste", c(these.dots.expanded[lapply(these.dots, length) > 1], sep = "_"))
   }
-  
-  out = dplyr::bind_rows(out, .id = param)
+
+  out = dplyr::bind_rows(out, .id = "param")
+  out = tidyr::separate(out, param, into = param.names.to.rep)
   return (out)
 }
 
@@ -42,7 +48,7 @@ replicate.sim.by.param <- function(type = "psychophysics.2afc",
 #' is an estimated parameter.
 
 replicate.sim <- function (n.reps, type = "psychophysics.2afc", ...) {
-  
+
   if (type == "psychophysics.2afc") {
     params <- as.data.frame(t(sapply(1:n.reps,
                                      one.sim.psyphys2afc, ...)))
