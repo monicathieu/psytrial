@@ -1,0 +1,110 @@
+---
+title: "Uncertainty of signal detection measures"
+author: "Monica Thieu"
+date: "5/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+require(rlang)
+source("../R/utils-sdt.R")
+
+super_spread <- function (data, key, ..., sep = "_", fill = NA, convert = FALSE, drop = TRUE) {
+  dots <- exprs(...)
+  key <- enquo(key)
+  output <- data %>%
+    gather(gkey, value, !!! dots) %>%
+    unite(ukey, !! key, gkey, sep = sep) %>%
+    spread(ukey, value, fill = fill, convert = convert, drop = drop)
+  
+  return (output)
+}
+```
+
+Signal detection theory provides a framework for determining the ability of an observer to discriminate "signal" from "noise".
+
+It stands to reason that for a given observer, with some underlying sensitivity, their performance on a signal detection task would not be the same every time they did the task, but would take the form of a distribution centered on their most likely performance. Thus, our goal in administering a single signal detection task to an observer is to estimate the center of that distribution, to find their most likely performance.
+
+It makes sense that administering more trials to an observer would yield a less noisy estimate of their performance. Signal detection measures, however, crucially _do not have an associated standard error that depends on the number of trials completed by an observer._ 
+
+```{r}
+# ASSUME equal number of signal and noise trials presented
+
+n_iterations <- 1000
+
+params <- crossing(this_dprime = c(0.5, 1:3),
+                   this_c = c(-0.5, 0, 0.5),
+                   n_trials_per_iteration = c(20, 100, 200)) %>%
+  group_by(this_dprime, this_c, n_trials_per_iteration) %>%
+  do(sim = data.frame(type = rep(c("signal", "noise"), times = .$n_trials_per_iteration/2),
+                      param_dprime = .$this_dprime,
+                      param_c = .$this_c) %>%
+       slice(rep(1:n(), times = n_iterations)) %>%
+       mutate(iteration = rep(1:n_iterations, each = n() / n_iterations)) %>%
+       group_by(iteration, type) %>%
+       mutate(n_trials = n(),
+              latent = if_else(type == "noise",
+                               rnorm(n(), -param_dprime/2, 1), # centering d' so c = 0 is unbiased
+                               rnorm(n(), param_dprime/2, 1)),
+              resp = if_else(latent >= param_c,
+                             "signal",
+                             "noise")) %>%
+       group_by(iteration, param_dprime, param_c, n_trials, type, resp) %>%
+       summarize(rate = n() / unique(n_trials),
+                 rate_snodgrass = (n() + .5) / (unique(n_trials) + 1)) %>% # snodgrass correction
+       complete(iteration, type, resp) %>%
+       distinct() %>% # not sure why but complete() is creating duplicate rows
+       group_by(iteration, param_dprime, param_c, n_trials) %>%
+       mutate(rate = coalesce(rate, 0),
+              rate_snodgrass = coalesce(rate_snodgrass, .5 / (unique(n_trials) + 1))) %>% # need to populate 0 false alarms row in case of perfect performance
+       filter(resp == "signal") %>%
+       select(-resp) %>%
+       mutate(type = recode(type,
+                            signal = "hit",
+                            noise = "fa")) %>%
+       super_spread(type, starts_with("rate")) %>%
+       summarize(dprime = sdt_dprime(hit_rate_snodgrass, fa_rate_snodgrass),
+                 sdt_c = sdt_c(hit_rate_snodgrass, fa_rate_snodgrass),
+                 aprime = sdt_aprime(hit_rate_snodgrass, fa_rate_snodgrass),
+                 b2prime = sdt_b2prime(hit_rate_snodgrass, fa_rate_snodgrass)))
+
+sims <- bind_rows(params$sim)
+
+sims_summary <- sims %>%
+  group_by(param_dprime, param_c, n_trials) %>%
+  summarize_at(vars(dprime, sdt_c, aprime, b2prime), .funs = c("median", "mad"))
+```
+
+```{r}
+sims %>%
+  ggplot(aes(x = dprime, color = factor(n_trials), fill = factor(n_trials))) +
+  #geom_histogram(bins = 20, position = "dodge", size = 0.2, alpha = 0.3) +
+  geom_freqpoly(bins = 20) +
+  geom_vline(aes(xintercept = dprime_median, color = factor(n_trials)), data = sims_summary) +
+  geom_vline(aes(xintercept = param_dprime), linetype = 3) +
+  facet_grid(param_c ~ param_dprime) +
+  theme_bw()
+```
+
+```{r}
+sims %>%
+  ggplot(aes(x = sdt_c, color = factor(n_trials), fill = factor(n_trials))) +
+  #geom_histogram(bins = 20, position = "dodge", size = 0.2, alpha = 0.3) +
+  geom_freqpoly(bins = 20) +
+  geom_vline(aes(xintercept = sdt_c_median, color = factor(n_trials)), data = sims_summary) +
+  geom_vline(aes(xintercept = param_c), linetype = 3) +
+  facet_grid(param_c ~ param_dprime) +
+  theme_bw()
+```
+
+```{r}
+sims %>%
+  ggplot(aes(x = aprime, color = factor(n_trials), fill = factor(n_trials))) +
+  #geom_histogram(bins = 20, position = "dodge", size = 0.2, alpha = 0.3) +
+  geom_freqpoly(bins = 20) +
+  geom_vline(aes(xintercept = aprime_median, color = factor(n_trials)), data = sims_summary) +
+  facet_grid(param_c ~ param_dprime, scales = "free_x") +
+  theme_bw()
+```
