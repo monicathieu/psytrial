@@ -35,25 +35,3 @@ one.sim.sdt.dprime <- function(trash = NULL,
 
   return (result)
 }
-
-#' internal
-#' @importFrom stats qnorm
-#' @param hit hit rate
-#' @param fa false alarm rate
-
-sdt_dprime <- function (hit, fa) {result = (stats::qnorm(hit) - stats::qnorm(fa)); return(result)}
-
-#' internal
-#' @importFrom stats qnorm
-#' @param hit hit rate
-#' @param fa false alarm rate
-
-sdt_c <- function (hit,fa) {result = (-.5 * (stats::qnorm(hit) + stats::qnorm(fa))); return(result)}
-
-#' internal
-#' Calculates rate correction against ceiling/floor rates
-#' per Snodgrass & Corwin, 1988.
-#' @param num numerator
-#' @param denom denominator
-
-snodgrass <- function (num, denom) {result = (num+.5)/(denom+1); return(result)}
